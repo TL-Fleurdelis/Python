@@ -9,7 +9,7 @@ pygame.init()
 
 # Screen setup
 screen = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Woman game")
+pygame.display.set_caption("Naruto game")
 
 # Paths
 
