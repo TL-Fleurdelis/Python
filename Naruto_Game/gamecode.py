@@ -49,7 +49,7 @@ enemy_images = [
 available_images = enemy_images.copy()
 
 def spawn_enemy():
-    """Sinh enemy mới nhưng không trùng ảnh và không quá gần nhau."""
+    """Spawn new enemies but don't have the same image and aren't too close together."""
     global available_images
     
     if len(enemyX) >= max_enemies:
@@ -85,7 +85,7 @@ font = pygame.font.Font('freesansbold.ttf', 32)
 textX, textY = 10, 10
 
 def show_score(x, y):
-    score = font.render(f"Score : {score_value}", True, (253, 63, 190))
+    score = font.render(f"Score: {score_value}", True, (253, 63, 190))
     screen.blit(score, (x, y))
 
 def player(x, y):
