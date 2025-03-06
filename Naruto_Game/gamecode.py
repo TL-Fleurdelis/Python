@@ -12,7 +12,6 @@ screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Naruto game")
 
 # Paths
-
 current_path = os.path.dirname(os.path.abspath(__file__))
 
 def get_image_path(filename):
@@ -20,6 +19,7 @@ def get_image_path(filename):
 
 def get_sound_path(filename):
     return os.path.join(current_path, "Assets", "Sounds", filename)
+
 # Load assets
 background = pygame.image.load(get_image_path("bg.png"))
 pygame.mixer.music.load(get_sound_path("bg.mp3"))
@@ -39,8 +39,8 @@ koX, koY = 200, 150
 
 # Enemy setup
 enemyImg, enemyX, enemyY, enemyX_change, enemyY_change = [], [], [], [], []
-num_of_enemies = 3  # Start with 3 enemies
-max_enemies = 10  # Max number of enemies
+num_of_enemies = 3
+max_enemies = 10
 
 enemy_images = [
     'sasuke.png', 'naruto.png', 'sai.png', 'gaara.png', 'neji.png',
@@ -49,19 +49,23 @@ enemy_images = [
 available_images = enemy_images.copy()
 
 def spawn_enemy():
-    """Spawn new enemies but don't have the same image and aren't too close together."""
+    """Spawn new enemies ensuring unique images and spacing."""
     global available_images
-    
+
     if len(enemyX) >= max_enemies:
         return  
     
+    max_attempts = 100  # Avoid infinite loops
+    attempts = 0
     spawn_x = random.randint(100, 700)
-    while any(abs(spawn_x - x) < 80 for x in enemyX):
+
+    while any(abs(spawn_x - x) < 80 for x in enemyX) and attempts < max_attempts:
         spawn_x = random.randint(100, 700)
-    
+        attempts += 1
+
     if not available_images:
         available_images = enemy_images.copy()
-    
+
     random_enemy = available_images.pop(random.randint(0, len(available_images) - 1))
     
     enemyImg.append(pygame.image.load(get_image_path(random_enemy)))
@@ -111,6 +115,7 @@ clock = pygame.time.Clock()
 # Game loop
 running = True
 while running:
+    pygame.event.pump()  # Fix "Not Responding" issue
     screen.fill((0, 0, 0))
     screen.blit(background, (0, 0))
 
@@ -131,13 +136,11 @@ while running:
             if event.key in (pygame.K_LEFT, pygame.K_RIGHT):
                 playerX_change = 0
 
-    # Increse enemy count when score < 50
     if score_value < 50:
         new_enemy_count = min(3 + score_value // 10, max_enemies)
         while len(enemyX) < new_enemy_count:
             spawn_enemy()
     
-    # Increase enemy speed when score >= 50
     enemy_speed = 1.5 + (score_value // 10) * 0.2 if score_value < 50 else 3.5
 
     playerX = max(0, min(playerX + playerX_change, 736))
@@ -158,16 +161,12 @@ while running:
             enemyY[i] += enemyY_change[i]
 
         if isCollision(enemyX[i], enemyY[i], bulletX, bulletY) and bullet_state == "fire":
-            pygame.mixer.Sound(get_sound_path("explosion.wav")).play(0)
+            pygame.mixer.Sound(get_sound_path("explosion.wav")).play()
             bulletY = 450
             bullet_state = "ready"
             score_value += 1
-            
-            spawn_x = random.randint(100, 700)
-            while any(abs(spawn_x - x) < 80 for x in enemyX):
-                spawn_x = random.randint(100, 700)
-            
-            enemyX[i] = spawn_x
+
+            enemyX[i] = random.randint(100, 700)
             enemyY[i] = random.randint(50, 120)
 
         enemy(enemyX[i], enemyY[i], i)
